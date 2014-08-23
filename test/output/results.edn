@@ -1,0 +1,48 @@
+{
+  "property-id" "tag:staff@noreply.openkim.org,2014-08-20:property/melt-temperature-cubic-crystal-nph-isotropic" 
+  "instance-id" 1 
+  "short-name" {
+    "source-value" "[ bcc ]"
+  } 
+  "species" {
+    "source-value" [
+      "Fe" 
+      "Fe"
+    ]
+  } 
+  "a" {
+    "source-unit" "angstrom" 
+    "source-std-uncert-value" "0.00035" 
+    "source-value" "2.98361"
+  } 
+  "basis-atom-coordinates" {
+    "source-value" [
+      [
+        0 
+        0 
+        0
+      ] 
+      [
+        0.5 
+        0.5 
+        0.5
+      ]
+    ]
+  } 
+  "space-group" {
+    "source-value" "Im-3m"
+  } 
+  "wyckoff-multiplicity-and-letter" {
+    "source-value" "2a"
+  } 
+  "pressure" {
+    "source-unit" "bar" 
+    "source-std-uncert-value" "1336.93750" 
+    "source-value" "-128.15732"
+  } 
+  "melt-temperature" {
+    "source-unit" "K" 
+    "source-std-uncert-value" "13.71037" 
+    "source-value" "2314.51550"
+  }
+}
