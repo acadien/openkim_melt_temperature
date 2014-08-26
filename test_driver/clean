@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+rm output/*
+rm kim.log

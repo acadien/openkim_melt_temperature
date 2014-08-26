@@ -12,7 +12,7 @@ def writeAndRun(lammpsInputFile, replacementVars,  MPIRanks = 1, debug = False):
     #Returns the output from running LAMMPS.
 
     Tguess = replacementVars['runnerTemperatureGuess']
-    lammpsToRunFile = "output/"+lammpsInputFile + "_" + Tguess
+    lammpsToRunFile = "output/"+lammpsInputFile + Tguess
 
     #Generate the input file with corresponding variables
     lammpsOut = open(lammpsInputFile,"r").readlines()
@@ -29,7 +29,7 @@ def writeAndRun(lammpsInputFile, replacementVars,  MPIRanks = 1, debug = False):
     command = commandString.split()
 
     if debug:
-        return open("output/log.lammps","r").readlines()
+        return open("output/log.lammps"+str(Tguess),"r").readlines()
     else:
         return subprocess.check_output(command).split("\n")
         

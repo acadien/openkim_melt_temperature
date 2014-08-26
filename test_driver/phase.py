@@ -4,7 +4,7 @@ from scipy import ndimage
 import numpy as np
 #local
 from KIMception import * #exceptions
-
+import parser
 
 def sliceBin(Zs,Vals,nBin):
     #Zs: Z fractional coordinates, 
@@ -27,6 +27,9 @@ def windowAvg(a,n=5):
     m = len(a)
     b = a+a+a
     return np.convolve(b, np.ones(n)/n,mode='same')[m:2*m]
+
+def MSDbyAtom(initConfig,allConfigs):
+    
 
 def phaseBoundsByPE(Zs,PEs,liqPE,solPE,logName=None):
     #Given the fractional Z coordinates, PE per atom and 
@@ -95,13 +98,17 @@ def phaseBoundsByPE(Zs,PEs,liqPE,solPE,logName=None):
     return lowerBoundIndex, upperBoundIndex, solPerc, liqPerc
 
 
-def checkCoexistence(initialDumpFile, finalDumpFile, lammpsThermoData, debug = False):
+def checkCoexistence(filesToParse, filesToLog, debug = False, T = None):
     #Track the Phase Boundary using Potential Energy and MSD
     #Returns one of ["Error","AllSolid","AllLiquid","Coexistence"]
-    ############################
-    #### Parse LAMMPS Output ###
-    ############################
 
+    initialDumpFile, finalDumpFile, lammpsThermoDataFile = filesToParse 
+    dataDumpFile, thermoDumpFile, ZPEFinallog = filesToLog
+    
+    #Start by parsing all of the data provided.
+
+    #Thermodynamics (vs time)
+    lammpsThermoData = open(lammpsThermoDataFile,"r").readlines()
     annealThermo,annealStartI = parser.parseThermo(lammpsThermoData,"Step Temp Press Volume TotEng Lx Pxx Pyy Pzz Pxy Pxz Pyz")
     annealThermo[0] = map(int,annealThermo[0])  #Steps should be ints
 
@@ -126,16 +133,14 @@ def checkCoexistence(initialDumpFile, finalDumpFile, lammpsThermoData, debug = F
 
     # Log stuff before processing and error checking so logs exist if test exits early. 
 
-    #Write Thermodynamic data during the heat/quench/anneal process
-    thermoData=["Step Temp Press Volume TotEng Lx Pxx Pyy Pzz Pxy Pxz Pyz\n"]+map(lambda x: " ".join(map(str,x))+"\n",zip(*annealThermo))
-    open(thermoDumpFile,"w").writelines(thermoData)
+    if not debug:
+        #Write Thermodynamic data during the heat/quench/anneal process
+        thermoData=["Step Temp Press Volume TotEng Lx Pxx Pyy Pzz Pxy Pxz Pyz\n"]+map(lambda x: " ".join(map(str,x))+"\n",zip(*annealThermo))
+        open(thermoDumpFile,"w").writelines(thermoData)
 
-    #Write Final configuration with atomic coordinates and potential energy
-    configData=["ID Species X Y Z PE\n"]+map(lambda x: " ".join(map(str,x))+"\n",zip(*atomsFinalTS[-1]))
-    open(dataDumpFile,"w").writelines(configData)
-
-    #Store the log.lammps for posterity (it is effectively redundant but might somehow be useful?)
-    shutil.move(lmpLogIn,lmpLogOut)
+        #Write Final configuration with atomic coordinates and potential energy
+        configData=["ID Species X Y Z PE\n"]+map(lambda x: " ".join(map(str,x))+"\n",zip(*atomsFinalTS[-1]))
+        open(dataDumpFile,"w").writelines(configData)
 
     #############################################################
     #### Find the Liquid and Solid average potential energies ###
@@ -155,6 +160,9 @@ def checkCoexistence(initialDumpFile, finalDumpFile, lammpsThermoData, debug = F
             solidEnergy += pe
     liquidPE = liquidEnergy/liquidCount
     solidPE = solidEnergy/solidCount
+
+    print T,liquidPE, solidPE, np.fabs(np.fabs(liquidPE)-np.fabs(solidPE))
+    return ""
 
     #If solidPE == liquidPE it implies the entire simulation is liquid. Not possible for entire simulation to be solid before annealing.
     if np.fabs(liquidPE - solidPE)/np.fabs(liquidPE) < 0.03:
@@ -181,6 +189,5 @@ def checkCoexistence(initialDumpFile, finalDumpFile, lammpsThermoData, debug = F
     PEFin = PEFinals[-1]       #Final per atom PE
     print "POST ANNEAL TEST:"
     pb1,pb2,solPerc,liqPerc = phaseBoundsByPE(ZFin,PEFin,liquidPE,solidPE,logName=ZPEFinallog)
-    nx,ny,nz = grabNxyzLMP(open(lammpsMeltFile_in,"r").readlines())
 
     return ""

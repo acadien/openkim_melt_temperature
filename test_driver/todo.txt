@@ -1,0 +1,3 @@
+clean up meanSquarDist.py
+test it
+continue dev of coexistence.

@@ -27,8 +27,8 @@ resultsEDN          = "output/results.edn"
 dataDumpFile        = "output/config.dat"
 thermoDumpFile      = "output/thermo.dat"
 ZPEFinallog         = "output/PEprofile.dat"
-lmpLogIn            = "log.lammps"
-lmpLogOut           = "output/log.lammps"
+#lmpLogIn            = "log.lammps"
+#lmpLogOut           = "output/log.lammps"
 runnerVariables     = ["runnerSpeciesSymbol","runnerLatticeType","runnerKimModel",\
                        "runnerMass","runnerLatticeConstant","runnerTemperatureGuess",\
                        "runnerTemperatureHigh","runnerPressure","runnerThermoTime"]
@@ -100,18 +100,28 @@ results['species']= {'source-value' :  [replacementVars['runnerSpeciesSymbol']]*
 ### Make the lammps melt file, Run LAMMPS ###
 #############################################
 
-bigTs = range(100,5100,500)
+bigTs = range(600,5100,500)
 highT = 5000
 replacementVars['runnerTemperatureHigh'] = str(highT)
 meltTrials = {}
-debug = False
+debug = True
 for trialT in bigTs:
 
     replacementVars['runnerTemperatureGuess'] = str(trialT)
-    lammpsIO.writeAndRun(lammpsShortMeltFile_in, replacementVars, MPIRanks)
+    lammpsIO.writeAndRun(lammpsShortMeltFile_in, replacementVars, MPIRanks, debug)
+
+    initialDumpFileT = initialDumpFile + str(trialT)
+    finalDumpFileT = finalDumpFile + str(trialT)
     lammpsThermoDataFileT = lammpsThermoDataFile + str(trialT)
-    phase = checkCoexistence(initialDumpFile, finalDumpFile, lammpsThermoDataFile, debug)
-    print trialT, phase
+    filesToParse = [initialDumpFileT, finalDumpFileT, lammpsThermoDataFileT]
+
+    dataDumpFileT = dataDumpFile + str(trialT)
+    thermoDumpFileT = thermoDumpFile + str(trialT)
+    ZPEFinallogT = ZPEFinallog + str(trialT)
+    filesToLog   = [dataDumpFileT, thermoDumpFileT, ZPEFinallogT]
+
+    currentPhase = phase.checkCoexistence(filesToParse, filesToLog, debug,trialT)
+    #print trialT, phase
 
 
 
@@ -119,6 +129,8 @@ for trialT in bigTs:
 ##############################################
 ### Analyze Thermodynamic data from anneal ###
 ##############################################
+
+nx,ny,nz = grabNxyzLMP(open(lammpsMeltFile_in,"r").readlines())
 
 #Simple averaging over last 1000 thermo outputs
 Nlast = annealTime/thermoTS/10
