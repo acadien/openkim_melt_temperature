@@ -2,9 +2,11 @@
 
 from scipy import ndimage
 import numpy as np
+import pylab as pl
 #local
 from KIMception import * #exceptions
 import parser
+from meanSquareDist import meanSquareDistRefAtom
 
 def sliceBin(Zs,Vals,nBin):
     #Zs: Z fractional coordinates, 
@@ -28,8 +30,14 @@ def windowAvg(a,n=5):
     b = a+a+a
     return np.convolve(b, np.ones(n)/n,mode='same')[m:2*m]
 
-def MSDbyAtom(initConfig,allConfigs):
-    
+def MSDbyAtom(allConfigs):
+    #Mean Square Displacement calculated per atom 
+    #atoms are in fractional coordinates
+
+    lengths = np.array([[0,1],[0,1],[0,1]])
+    delt,msdAtom = meanSquareDistRefAtom(allConfigs,0,len(allConfigs[0]),len(allConfigs),lengths)
+    return list((msdAtom.T)[-1])
+
 
 def phaseBoundsByPE(Zs,PEs,liqPE,solPE,logName=None):
     #Given the fractional Z coordinates, PE per atom and 
@@ -38,7 +46,7 @@ def phaseBoundsByPE(Zs,PEs,liqPE,solPE,logName=None):
     #solid liquid phase boundaries, assumes only 2 phase boundaries
 
     nbins = 50
-    zBins,zPE = sliceBin(Zs,PEInit,nbins)
+    zBins,zPE = sliceBin(Zs,PEs,nbins)
     zPEsmooth = windowAvg(zPE,5)
     zPEprime = windowAvg(deriv(zBins[1]-zBins[0],zPEsmooth)).tolist()
     if logName!=None:
@@ -124,10 +132,11 @@ def checkCoexistence(filesToParse, filesToLog, debug = False, T = None):
     ids,types,Xs,Ys,Zs,PEs = atomsInitTS[0]
     PEInit = list(PEs)
     ZInit = list(Zs)
-
+    
     #Atomic locations in fractional coordinates
-    ZFinals,PEFinals = list(),list()
+    ZFinals,PEFinals,atomFinals = list(),list(),list()
     for i in atomsFinalTS:
+        atomFinals.append(zip(i[2],i[3],i[4]))
         ZFinals.append(i[4])
         PEFinals.append(i[5])
 
@@ -161,7 +170,21 @@ def checkCoexistence(filesToParse, filesToLog, debug = False, T = None):
     liquidPE = liquidEnergy/liquidCount
     solidPE = solidEnergy/solidCount
 
-    print T,liquidPE, solidPE, np.fabs(np.fabs(liquidPE)-np.fabs(solidPE))
+#    print T,liquidPE, solidPE, np.fabs(np.fabs(liquidPE)-np.fabs(solidPE))
+#    msdAtom = MSDbyAtom(atomFinals)
+#    print sum(msdAtom)/len(msdAtom)
+#    nbins = 25
+#    zBins,zMSD = sliceBin(ZInit,msdAtom,nbins)
+#    zBins,zPE = sliceBin(ZInit,msdAtom,nbins)
+#    pl.plot(zBins,zMSD)
+    return ""
+#    for i in range(len(atomsFinalTS)):
+#        atomsFinalTS[i].append(msdAtom)
+#    configData=["ID Species X Y Z PE MSD\n"]+map(lambda x: " ".join(map(str,x))+"\n",zip(*atomsFinalTS[-1]))
+#    open("output/msd_"+str(T)+".dump","w").writelines(configData)
+#    pl.show()
+#    phaseBoundsByPE(ZInit,msdAtom,liquidPE,solidPE)
+"""
     return ""
 
     #If solidPE == liquidPE it implies the entire simulation is liquid. Not possible for entire simulation to be solid before annealing.
@@ -191,3 +214,4 @@ def checkCoexistence(filesToParse, filesToLog, debug = False, T = None):
     pb1,pb2,solPerc,liqPerc = phaseBoundsByPE(ZFin,PEFin,liquidPE,solidPE,logName=ZPEFinallog)
 
     return ""
+"""

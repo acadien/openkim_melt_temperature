@@ -1,0 +1,46 @@
+#This file should be altered by the runner to create a valid LAMMPS input script
+#with the goal of calculating the melting temperature
+
+#TODO:
+#Include multi-species stufffffff
+#should region be variable or fixed?
+
+#Variables
+#timestep        0.002
+variable	annealP equal 0.0 #runnerPressure
+
+#Units/Boundary
+units           metal 
+boundary        p p p
+atom_style      atomic
+
+
+#Arrange the atoms    
+#lattice         runnerLatticeType runnerLatticeConstant
+lattice		bcc 2.816
+region          box block -5 5 -5 5 -5 5
+create_box      1 box
+create_atoms    1 box
+#mass 		1 runnerMass
+mass 		1 1.0
+
+#Interactions
+#pair_style      kim LAMMPSvirial runnerKimModel
+#pair_coeff      * * runnerSpeciesSymbol
+pair_style      kim LAMMPSvirial EAM_Dynamo_Ackland_Bacon_Fe__MO_142799717516_001
+pair_coeff      * * Fe
+
+
+#Setup the output
+thermo_style	custom step temp press vol etotal lx pxx pyy pzz pxy pxz pyz 
+thermo          100
+log		log.lammps
+
+#Initialize both halves
+velocity        all create 10 4928459 dist gaussian
+fix             1 all npt temp 10 3510 0.1 iso ${annealP} ${annealP} 1.0
+run             15000
+
+unfix		1
+fix             1 all npt temp 3510 10 0.1 iso ${annealP} ${annealP} 1.0
+run             35000

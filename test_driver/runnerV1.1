@@ -11,7 +11,7 @@ import subprocess,json,shutil
 from collections import OrderedDict
 #local
 from KIMception import * #exceptions
-import lammpsIO,parser,phase
+import lammpsIO,phase
 
 ################################
 ### File Names and Constants ###
@@ -100,11 +100,11 @@ results['species']= {'source-value' :  [replacementVars['runnerSpeciesSymbol']]*
 ### Make the lammps melt file, Run LAMMPS ###
 #############################################
 
-bigTs = range(600,5100,500)
+bigTs = range(600,4600,500)
 highT = 5000
 replacementVars['runnerTemperatureHigh'] = str(highT)
 meltTrials = {}
-debug = True
+debug = False
 for trialT in bigTs:
 
     replacementVars['runnerTemperatureGuess'] = str(trialT)
@@ -122,8 +122,9 @@ for trialT in bigTs:
 
     currentPhase = phase.checkCoexistence(filesToParse, filesToLog, debug,trialT)
     #print trialT, phase
-
-
+import pylab as pl
+pl.legend(map(str,bigTs),loc=0)
+pl.show()
 
 """
 ##############################################

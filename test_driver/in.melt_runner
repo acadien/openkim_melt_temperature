@@ -1,0 +1,82 @@
+#This file should be altered by the runner to create a valid LAMMPS input script
+#with the goal of calculating the melting temperature
+
+#TODO:
+#Include multi-species stufffffff
+#should region be variable or fixed?
+
+#Variables
+#timestep        0.002
+variable        annealT equal runnerTemperatureGuess
+variable	highT equal runnerTemperatureHigh
+variable	annealP equal runnerPressure
+variable	annealTime equal runnerAnnealTimeSteps
+
+
+#Units/Boundary
+units           metal 
+boundary        p p p
+atom_style      atomic
+
+
+#Arrange the atoms    
+lattice         runnerLatticeType runnerLatticeConstant
+region          box block -5 5 -5 5 -30 30
+create_box      1 box
+create_atoms    1 box
+mass 		1 runnerMass
+
+#Interactions
+pair_style      kim LAMMPSvirial runnerKimModel
+pair_coeff      * * runnerSpeciesSymbol
+
+
+#Setup the Solid and Liquid Regions
+region          1 block -6 6 -6 6 INF -0.01
+group           solidzone region 1
+region          2 block -6 6 -6 6 -0.01 INF
+group           meltzone  region 2
+
+
+#Setup the output
+thermo_style	custom step temp press vol etotal lx pxx pyy pzz pxy pxz pyz 
+thermo          runnerThermoTime
+
+#Initialize both halves
+velocity        all create 10 4928459 dist gaussian
+fix             1 all npt temp 10 ${annealT} 0.1 iso ${annealP} ${annealP} 1.0
+run             1000
+unfix   1
+
+fix             1 all npt temp ${annealT} ${annealT} 0.1 iso ${annealP} ${annealP} 1.0
+run             9000
+unfix   1
+
+#Melt the liquid half (solid remains fixed)
+fix             1 meltzone npt temp ${annealT} ${highT} 0.1 iso ${annealP} ${annealP} 1.0
+run             15000
+unfix   1
+
+#Quench the liquid half (solid remains fixed)
+fix             1 meltzone npt temp ${highT} ${annealT} 0.1 iso ${annealP} ${annealP} 1.0
+run             15000
+unfix   1 
+
+#Sample the configuration before annealing, to get a snapshot of the solid and liquid
+compute   	PE all pe/atom
+dump            atmelt all custom 1 output/initial.dump id type xs ys zs c_PE
+fix             1 all nph iso ${annealP} ${annealP} 1.0
+run		1
+uncompute 	PE
+undump		atmelt
+unfix 	1
+
+#Anneal both halves
+fix             1 all nph iso ${annealP} ${annealP} 1.0
+run             10000 #1000000
+
+#Collect hundreds of configs and PE for deep analysis of final state:
+#  MSD, Coordination, TOP, BOP, RDF...?
+compute   	PE all pe/atom
+dump		test all custom 1 output/final.dump id type xs ys zs c_PE
+run		100
