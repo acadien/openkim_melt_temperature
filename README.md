@@ -26,7 +26,7 @@ After annealing (under NPH):
   |                                                     |
   |-----------------------------------------------------|
 ```
-This could be:
+##This could be:
 * all solid  (>90% solid)
 * all liquid (>90% liquid)
 * solid-liquid coexistence 
@@ -51,7 +51,7 @@ Once coexistence is achieved the driver will spit out the corresponding cauchy-s
 
 So how do we achieve coexistence?  We guess at annealing temperatures until we stumble upon it. Start cold and grow hot.  
 
-Psuedo code for test:
+##Psuedo code for test:
 ```
 minT,maxT = 100,5100
 bigTs = [minT ... maxT ... 500]
@@ -98,7 +98,7 @@ exit()
 Once coexistence is found it is rerun with a bigger simulation and with longer anneal time to ensure a stable equilibrium has been achieved.  The final structures are analyzed and the results are spit out.
 
 
-*** checkCoexistence(): ***
+##checkCoexistence():
 Inputs
 * One configuration prior to annealing but immediately after the liquid is quenched, including potential energy per atom.
 * Many (hundreds) of configurations after annealing
