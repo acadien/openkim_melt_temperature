@@ -9,23 +9,23 @@ The goal is to achieve a coexistence between solid and liquid at the Melting Tem
 The simulation is setup with a long block of solid and a long block of liquid attached in the center.  
 
 Prior to annealing:
-
+```
   face                   Interface                  Inter
   |--------------------------|--------------------------|
   |                          |                          |
   |   Stable Solid Phase     | Quenched Liquid(?) Phase |
   |                          |                          |
   |--------------------------|--------------------------|
-
+```
 
 After annealing (under NPH):
-
+```
   |-----------------------------------------------------|
   |					  	        |
   |               Unknown mixture of phases             |
   |						        |
   |-----------------------------------------------------|
-
+```
 This could be:
      * all solid  (>90% solid)
      * all liquid (>90% liquid)
@@ -36,13 +36,15 @@ This could be:
        * who knows what
 
 If succesful this test driver should create something like this:
-   	     Interface                Interface
+```
+   	         Interface                Interface
   |--------------|------------------------|-------------|
   |              |                        |             |
   |    Solid     |         Liquid         |   Solid     |
   |              |                        |             |
   |--------------|------------------------|-------------|
- 
+```
+
 The interfaces should be mobile.  
 
 Once coexistence is achieved the driver will spit out the corresponding cauchy-stress, temperature and a guess at the stable solid lattice constant (a).
@@ -50,7 +52,7 @@ Once coexistence is achieved the driver will spit out the corresponding cauchy-s
 So how do we achieve coexistence?  We guess at annealing temperatures until we stumble upon it. Start cold and grow hot.  
 
 Psuedo code for test:
-"""
+```
 minT,maxT = 100,5100
 bigTs = [minT ... maxT ... 500]
 for trialT in bigTs:
@@ -91,16 +93,16 @@ generate clear log information()
 copy all necessary log files()
 clean up()
 exit()
-"""
+```
 
 Once coexistence is found it is rerun with a bigger simulation and with longer anneal time to ensure a stable equilibrium has been achieved.  The final structures are analyzed and the results are spit out.
 
 
 *** checkCoexistence(): ***
 Inputs:
-     * One configuration prior to annealing but immediately after the liquid is quenched, including potential energy per atom.
-     * Many (hundreds) of configurations after annealing
-     * The full thermodynamic profile (sans configurations) during the annealing run
+*One configuration prior to annealing but immediately after the liquid is quenched, including potential energy per atom.
+*Many (hundreds) of configurations after annealing
+*The full thermodynamic profile (sans configurations) during the annealing run
 
 Outputs:
 One of: ["Error","AllSolid","AllLiquid","Coexistence"]
