@@ -21,19 +21,19 @@ Prior to annealing:
 After annealing (under NPH):
 ```
   |-----------------------------------------------------|
-  |					  	        |
+  |					  	                                        |
   |               Unknown mixture of phases             |
-  |						        |
+  |						                                          |
   |-----------------------------------------------------|
 ```
 This could be:
-     * all solid  (>90% solid)
-     * all liquid (>90% liquid)
-     * solid-liquid coexistence 
-     * A garbage mixture of bizarre junk
-       * glass
-       * a cluster of grain boundaries
-       * who knows what
+* all solid  (>90% solid)
+* all liquid (>90% liquid)
+* solid-liquid coexistence 
+* A garbage mixture of bizarre junk
+  * glass
+  * a cluster of grain boundaries
+  * who knows what
 
 If succesful this test driver should create something like this:
 ```
@@ -99,11 +99,11 @@ Once coexistence is found it is rerun with a bigger simulation and with longer a
 
 
 *** checkCoexistence(): ***
-Inputs:
-*One configuration prior to annealing but immediately after the liquid is quenched, including potential energy per atom.
-*Many (hundreds) of configurations after annealing
-*The full thermodynamic profile (sans configurations) during the annealing run
+Inputs
+* One configuration prior to annealing but immediately after the liquid is quenched, including potential energy per atom.
+* Many (hundreds) of configurations after annealing
+* The full thermodynamic profile (sans configurations) during the annealing run
 
-Outputs:
+Outputs
 One of: ["Error","AllSolid","AllLiquid","Coexistence"]
 
