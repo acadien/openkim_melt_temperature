@@ -21,9 +21,9 @@ Prior to annealing:
 After annealing (under NPH):
 ```
   |-----------------------------------------------------|
-  |					  	                                        |
+  |                                                     |
   |               Unknown mixture of phases             |
-  |						                                          |
+  |                                                     |
   |-----------------------------------------------------|
 ```
 This could be:
